@@ -2,7 +2,7 @@
 
 > **RTL Design Project — Mirafra Technologies**  
 > **Engineer:** Vedant Vasant Kunjar · Employee ID: 6948  
-> **Specification Version:** v2.0 (DV Clarifications Addressed)  
+> **Specification Version:** v2  
 > **Reference Standards:** NIST FIPS 197 (AES) · NIST SP 800-38A (CTR Mode)
 
 ---
