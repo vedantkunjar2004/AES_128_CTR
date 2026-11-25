@@ -1,15 +1,3 @@
-// Pure APB4 protocol shim. Holds no state and no security logic - it
-// just decodes the SETUP/ACCESS phase and forwards a flat internal
-// register-file bus to register_bank. This is a zero-wait-state slave:
-// every access completes in the ACCESS cycle it starts in (PREADY tied
-// high), which is legal for APB4 and works here since every register
-// in register_bank is a single-cycle read/write.
-//
-// If a future register needs to stall (e.g. TX FIFO backpressure using
-// wait states instead of a dropped-push error), that logic belongs
-// here, driven by a hold input from register_bank. Not implemented yet -
-// see the PT_PUSH handling in register_bank.v for the current approach.
-
 module apb4_interface #(
     parameter PADDR_WIDTH = 7          // paddr[6:2] maps to the 5-bit reg_addr (32 word slots)
 )(
