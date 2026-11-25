@@ -74,9 +74,6 @@ module key_expansion (
         next_round_no = round_no;
         next_busy     = busy;
         next_done     = 1'b0;
-        // Fix: gate on ~busy so a re-asserted/stray start can't restart
-        // expansion mid-way through and corrupt key_mem (mirrors the same
-        // protection aes_engine already applies to round_datapath's start).
         if (start && !busy) begin
             next_round_no = 4'd1;
             next_busy     = 1'b1;          
