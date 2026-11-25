@@ -1,37 +1,3 @@
-// Crypto_clk domain sequencer, sitting between the TX/RX async FIFOs
-// and aes_engine. It pops one plaintext block from the TX FIFO, drives
-// aes_engine through one block of CTR encryption, and pushes the
-// resulting ciphertext into the RX FIFO - one block at a time, fully
-// serialized. A new block is never started until the previous block's
-// ciphertext has been pushed to the RX FIFO, which keeps aes_engine's
-// internal data_out_held register safe: it is never overwritten by a
-// new block before this FSM has consumed the old result.
-//
-// All *_sync inputs are assumed already synchronized upstream (via
-// cdc_pulse_sync) before they reach this module - this module itself
-// has no CDC logic, the same discipline register_bank.v follows on the
-// pclk side.
-//
-// KEY_LOAD / IV_LOAD are only forwarded to aes_engine when this FSM is
-// genuinely idle and the TX FIFO is empty (fsm_idle below), not just
-// when aes_busy is 0. aes_busy reads 0 during the pop-wait/push states
-// around a block too, so forwarding a key/IV change during one of
-// those windows could let key_expansion start overwriting its
-// round-key RAM while round_datapath is still reading from it for a
-// block in flight. Software must not issue KEY_LOAD or IV_LOAD while
-// STATUS.BUSY is set or the TX FIFO still holds queued plaintext - a
-// pulse arriving under those conditions is dropped, not queued. This
-// is deliberate: queueing it would leave KEY_READY showing a stale
-// ready state while software believes the new key already took
-// effect, which is worse than a documented, predictable drop.
-//
-// ZEROIZE is the one exception: it is wired straight through to
-// aes_engine every cycle, unconditionally, so a wipe takes effect
-// immediately regardless of what else is going on. It also resets
-// this FSM back to IDLE, abandoning any block in flight, since
-// waiting for a done pulse from a computation that was just wiped
-// would otherwise deadlock the FSM.
-
 module control_fsm (
     input  wire          clk,        // crypto_clk
     input  wire          rst_n,
